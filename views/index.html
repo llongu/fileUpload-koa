@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+  }
+
+  li {
+    list-style: none;
+    border-bottom: 1px solid #CCC;
+    overflow: hidden;
+  }
+
+  .error {
+    background-color: #fda2a2;
+  }
+
+  .success {
+    background-color: #a1fc8a;
+  }
+
+  #uploadList li * {
+    float: left;
+    margin: 15px;
+  }
+</style>
+
+<body>
+  <input type="file" name="" multiple id="upload">
+  <ul id="uploadList"></ul>
+
+</body>
+<script src="https://cdn.staticfile.org/spark-md5/3.0.0/spark-md5.min.js"></script>
+<script src="/javascripts/FileRender.js"></script>
+<script src="/javascripts/FileUpload.js"></script>
+<script src="/javascripts/FileHandle.js"></script>
+<script src="/javascripts/Uploader.js"></script>
+
+<script>
+  document.getElementById('upload').addEventListener('change', function (e) {
+    const files = e.target.files
+    Object.keys(files).forEach(async item => Uploader.create(files[item]))
+  })
+
+</script>
+
+</html>
