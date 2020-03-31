@@ -99,6 +99,7 @@ class FileUpload {
       sendForm.append(item, data[item])
     })
     const url = this.uploadStatus == 'check' ? 'fileCheck' : 'fileUpload'
+
     this.http.open('post', `./${url}`, true)
     this.http.send(sendForm)
   }

@@ -5,6 +5,9 @@ const path = require('path')
 
 const md5FilePath = path.join('service/files/md5.json')
 
+const uploadMap = {}//上传对象 stream 映射 
+let md5Json = {} //断点续传 查看已上传 current chunk
+
 router.get('/', async (ctx, next) => {
   await ctx.render('index.html')
 })
@@ -12,25 +15,31 @@ router.get('/', async (ctx, next) => {
 router.post('/fileCheck', (ctx, next) => {
   const form = new multiparty.Form();
   createFile(md5FilePath)
-  let md5Obj = fs.readFileSync(md5FilePath, 'utf8') || '{}'
-  md5Obj = JSON.parse(md5Obj)
-  const md5Arr = Object.keys(md5Obj)
+  let md5Arr = ''
+  try {
+    md5Json = JSON.parse(fs.readFileSync(md5FilePath, 'utf8') || '{}')
+    md5Arr = Object.keys(md5Json)
+  } catch (error) {
+    console.log(md5Json);
+    console.log(fs.readFileSync(md5FilePath, 'utf8'));
+  }
 
   return new Promise(reolve => {
     form.parse(ctx.req, function (err, fields, files) {
       if (err) { throw err; return; }
       const md5 = fields['md5'][0]
       const chunkNum = fields['chunkNum'][0]
+
       let status = 200
-      //检验 MD5 与 已上传数量
+      //检验 MD5 与 断点续传 已上传数量 current chunk
       if (!(md5Arr.indexOf(`${md5}`) > -1)) {
         status = 201
-        md5Obj = {
-          ...md5Obj,
+        md5Json = {
+          ...md5Json,
           [md5]: []
         }
-        fs.writeFileSync(md5FilePath, JSON.stringify(md5Obj))
-      } else if (md5Obj[md5].length !== chunkNum) {//断点续传
+        fs.writeFileSync(md5FilePath, JSON.stringify(md5Json))
+      } else if (md5Json[md5].length !== Number(chunkNum)) {
         status = 201
       }
 
@@ -41,13 +50,6 @@ router.post('/fileCheck', (ctx, next) => {
     });
   })
 })
-
-const uploadMap = {
-  // [fileName]:{
-  // createWriteStream,
-  // current[]
-  // }
-}
 
 router.post('/fileUpload', async (ctx, next) => {
   const form = new multiparty.Form();
@@ -66,20 +68,35 @@ router.post('/fileUpload', async (ctx, next) => {
       if (current == 0) {
         uploadMap[md5] = {}
         uploadMap[md5]['createWriteStream'] = fs.createWriteStream(path.join('service/files/', name))
-      }
-      const getFile = fs.createReadStream(file.path);
-      getFile.pipe(uploadMap[md5]['createWriteStream'], { end: false })
-      getFile.on('data', function (chunk) {
-        // console.log('图片保存成功');
-        // fs.writeFileSync(md5FilePath, JSON.stringify(md5Obj2))
-      });
 
-      setTimeout(() => {
+      }
+      /**
+       * 断点续传未合并
+       * 实际需要保存current对应的 chunk， createReadStream进行合并
+       */
+      if (md5Json[md5].indexOf(current) > -1) {
         ctx.body = {
           status
         }
         resolve()
-      }, 500);
+        return
+      }
+
+      md5Json[md5].push(current)
+      fs.writeFile(md5FilePath, JSON.stringify(md5Json), (e) => {
+        if (e) throw e
+      })
+
+      const getFile = fs.createReadStream(file.path);
+      getFile.pipe(uploadMap[md5]['createWriteStream'], { end: false })
+      getFile.on('end', function (chunk) {
+        setTimeout(() => {
+          ctx.body = {
+            status
+          }
+          resolve()
+        }, 500);
+      });
     });
   })
 })

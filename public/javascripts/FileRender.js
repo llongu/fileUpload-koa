@@ -17,7 +17,6 @@ class FileRender {
     const remove = document.createElement('button')
     const span = document.createElement('span')
 
-
     li.setAttribute("id", this.domID);
     h5.innerText = this.file.name
     div.innerText = '0%'
@@ -56,6 +55,7 @@ class FileRender {
     const button = this.dom.getElementsByClassName('puse')[0]
     button.innerText = '暂停'
     button.addEventListener('click', (e) => this.pause(e))
+
   }
   remove(e) {
     this.dom.remove()
