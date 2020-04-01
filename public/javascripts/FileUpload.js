@@ -1,7 +1,7 @@
 class FileUpload {
   constructor(uploadMsg, chunkList, UPLOADER) {
-    this.http = new XMLHttpRequest()
     this.UPLOADER = UPLOADER
+    this.http = null
 
     this.uploadMsg = uploadMsg  //上传信息
     this.chunkList = chunkList  //file blob 
@@ -15,6 +15,7 @@ class FileUpload {
   }
 
   create() {
+    this.http = new XMLHttpRequest()
     this.http.onreadystatechange = this.onreadystatechange
     this.http.onload = this.onload
     this.http.onerror = this.onerror

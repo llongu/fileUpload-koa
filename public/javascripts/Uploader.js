@@ -40,9 +40,12 @@ const Uploader = {
     this.notify()
   },
   pause(md5) {
+    console.warn('pause      ' + md5);
     this.fileUpload[md5].uploadStatus = 'pause'
   },
   continue(md5) {
+    console.warn('continue           ' + md5);
+
     this.fileUpload[md5].uploadStatus = 'upload'
     this.fileUpload[md5].upload()
   },
@@ -63,7 +66,7 @@ const Uploader = {
   notify() {
     const { success, error, total } = this.uploadFileStatus
     if (total === error) {
-      console.warn('上传失败')
+      console.warn('全部上传失败')
       return
     }
     if (total === success + error) {
@@ -71,7 +74,7 @@ const Uploader = {
         console.warn(`${success}上传成功，${error}上传失败`)
         return
       }
-      console.warn('上传成功')
+      console.warn('全部上传成功')
     }
   }
 }

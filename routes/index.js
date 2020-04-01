@@ -6,7 +6,7 @@ const path = require('path')
 const md5FilePath = path.join('service/files/md5.json')
 
 const uploadMap = {}//上传对象 stream 映射 
-let md5Json = {} //断点续传 查看已上传 current chunk
+let md5Json = {} //断点续传 查看已上传数量 current chunk
 
 router.get('/', async (ctx, next) => {
   await ctx.render('index.html')
@@ -31,7 +31,7 @@ router.post('/fileCheck', (ctx, next) => {
       const chunkNum = fields['chunkNum'][0]
 
       let status = 200
-      //检验 MD5 与 断点续传 已上传数量 current chunk
+      //检验 MD5 与 已上传数量 current chunk
       if (!(md5Arr.indexOf(`${md5}`) > -1)) {
         status = 201
         md5Json = {
@@ -42,6 +42,9 @@ router.post('/fileCheck', (ctx, next) => {
       } else if (md5Json[md5].length !== Number(chunkNum)) {
         status = 201
       }
+      // const statusArr = [200,200,201]
+      // const random=Math.ceil(Math.random()*status.length-1)
+      //  status = status[random]
 
       ctx.body = {
         status
@@ -55,6 +58,9 @@ router.post('/fileUpload', async (ctx, next) => {
   const form = new multiparty.Form();
   await new Promise((resolve, reject) => {
     const status = 200
+    // const statusArr = [200,200,201]
+    // const random=Math.ceil(Math.random()*status.length-1)
+    // const status = status[random]
     form.parse(ctx.req, async function (err, fields, files) {
       if (err) { throw err; return; }
       // console.log(fields);
@@ -71,8 +77,8 @@ router.post('/fileUpload', async (ctx, next) => {
 
       }
       /**
-       * 断点续传未合并
-       * 实际需要保存current对应的 chunk， createReadStream进行合并
+       * 现断点续传 文件会损坏
+       * 实际需要保存current对应的 chunk createReadStream 后合并
        */
       if (md5Json[md5].indexOf(current) > -1) {
         ctx.body = {

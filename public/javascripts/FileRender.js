@@ -6,6 +6,7 @@ class FileRender {
     this.md5 = ''
     this.dom = ''
     this.domID = file.name.split('.')[0] + file.size
+    this.bindFn = null
     this.begin()
   }
 
@@ -32,15 +33,16 @@ class FileRender {
     document.getElementById('uploadList').appendChild(li)
 
     this.dom = document.getElementById(this.domID)
-    puse.addEventListener('click', (e) => this.pause(e))
-    remove.addEventListener('click', (e) => this.remove(e))
+    this.bindFn = this.pause.bind(this)
+    puse.addEventListener('click', this.bindFn)
+    remove.addEventListener('click', this.remove)
   }
 
   begin() {
     this.create()
   }
 
-  loaded() {
+  loaded() {//read done
     this.dom.getElementsByClassName('loading')[0].innerText = '上传中...'
   }
 
@@ -48,14 +50,27 @@ class FileRender {
     this.UPLOADER.pause(this.md5)
     const button = this.dom.getElementsByClassName('puse')[0]
     button.innerText = '继续'
-    button.addEventListener('click', (e) => this.continue(e))
+    button.disabled = true
+
+    button.removeEventListener('click', this.bindFn)
+    this.bindFn = this.continue.bind(this)
+    button.addEventListener('click', this.bindFn)
+    setTimeout(() => {
+      button.disabled = false
+    }, 1000);
   }
   continue(e) {
     this.UPLOADER.continue(this.md5)
     const button = this.dom.getElementsByClassName('puse')[0]
     button.innerText = '暂停'
-    button.addEventListener('click', (e) => this.pause(e))
+    button.disabled = true
 
+    button.removeEventListener('click', this.bindFn)
+    this.bindFn = this.pause.bind(this)
+    button.addEventListener('click', this.bindFn)
+    setTimeout(() => {
+      button.disabled = false
+    }, 1000);
   }
   remove(e) {
     this.dom.remove()
