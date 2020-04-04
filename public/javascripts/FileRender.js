@@ -35,7 +35,7 @@ class FileRender {
     this.dom = document.getElementById(this.domID)
     this.bindFn = this.pause.bind(this)
     puse.addEventListener('click', this.bindFn)
-    remove.addEventListener('click', this.remove)
+    remove.addEventListener('click', (e)=>this.remove(e))
   }
 
   begin() {
