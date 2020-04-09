@@ -65,16 +65,20 @@ const Uploader = {
   },
   notify() {
     const { success, error, total } = this.uploadFileStatus
+    const msg = document.getElementById('msg')
     if (total === error) {
       console.warn('全部上传失败')
+      msg.innerHTML = '全部上传失败'
       return
     }
     if (total === success + error) {
       if (error) {
         console.warn(`${success}上传成功，${error}上传失败`)
+        msg.innerHTML = `${success}上传成功，${error}上传失败`
         return
       }
       console.warn('全部上传成功')
+      msg.innerHTML = '全部上传成功'
     }
   }
 }

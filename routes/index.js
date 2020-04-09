@@ -42,7 +42,7 @@ router.post('/fileCheck', (ctx, next) => {
       } else if (md5Json[md5].length !== Number(chunkNum)) {
         status = 201
       }
-      
+
 
       ctx.body = {
         status
@@ -56,8 +56,8 @@ router.post('/fileUpload', async (ctx, next) => {
   const form = new multiparty.Form();
   await new Promise((resolve, reject) => {
     // const status = 200
-    const statusArr = [200,201,201]
-    const random=Math.ceil(Math.random()*statusArr.length-1)
+    const statusArr = [200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 201]
+    const random = Math.ceil(Math.random() * statusArr.length - 1)
     const status = statusArr[random]
     form.parse(ctx.req, async function (err, fields, files) {
       if (err) { throw err; return; }
